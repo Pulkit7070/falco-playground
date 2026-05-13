@@ -1,0 +1,62 @@
+# Fixture: demonstrates the override grammar added in falco-schema fix (#3432).
+# All four override-able fields are exercised so the schema covers them.
+
+- required_engine_version: 26
+
+- required_plugin_versions:
+    - name: container
+      version: 0.4.0
+
+- macro: never_true
+  condition: (evt.num=0)
+
+- list: shell_binaries
+  items: [ash, bash, csh, ksh, sh, tcsh, zsh, dash]
+
+# Override a macro condition (append)
+- macro: never_true
+  condition: and (proc.name=custom_proc)
+  override:
+    condition: append
+
+# Override a list's items (append)
+- list: shell_binaries
+  items: [fish]
+  override:
+    items: append
+
+# Full rule definition using the source and exceptions fields
+- rule: Read sensitive file untrusted
+  desc: An attempt to read any sensitive file by a non-trusted program.
+  condition: open_read and sensitive_files
+  output: >
+    Sensitive file opened for reading |
+    file=%fd.name user=%user.name command=%proc.cmdline
+  priority: WARNING
+  source: syscall
+  tags: [host, container, filesystem]
+  exceptions:
+    - name: proc_name
+      fields: proc.name
+      comps: =
+      values:
+        - trusted_reader
+
+# Override a rule — only the fields being changed are required;
+# desc/condition/output/priority are intentionally absent.
+- rule: Read sensitive file untrusted
+  override:
+    enabled: replace
+  enabled: false
+
+# Override a rule condition by appending extra exclusion logic
+- rule: Read sensitive file untrusted
+  condition: and not proc.name=my_trusted_binary
+  override:
+    condition: append
+
+# Override a rule priority (replace only)
+- rule: Read sensitive file untrusted
+  priority: NOTICE
+  override:
+    priority: replace

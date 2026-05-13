@@ -7,6 +7,9 @@
         "$ref": "#definitions/RequiredEngineVersionRef"
       },
       {
+        "$ref": "#definitions/RequiredPluginVersionsRef"
+      },
+      {
         "$ref": "#definitions/ListRef"
       },
       {
@@ -14,6 +17,9 @@
       },
       {
         "$ref": "#definitions/RuleRef"
+      },
+      {
+        "$ref": "#definitions/OverrideRuleRef"
       },
       {
         "$ref": "#definitions/AppendOnlyRuleRef"
@@ -34,6 +40,46 @@
       },
       "required": ["required_engine_version"],
       "title": "RequiredEngineVersion"
+    },
+    "RequiredPluginVersionsRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "required_plugin_versions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "version": {
+                "type": "string"
+              },
+              "alternatives": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    },
+                    "version": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["name", "version"]
+                }
+              }
+            },
+            "required": ["name", "version"]
+          }
+        }
+      },
+      "required": ["required_plugin_versions"],
+      "title": "RequiredPluginVersions"
     },
     "ListRef": {
       "type": "object",
@@ -57,6 +103,16 @@
         },
         "append": {
           "type": "boolean"
+        },
+        "override": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "items": {
+              "type": "string",
+              "enum": ["append", "replace"]
+            }
+          }
         }
       },
       "required": ["list", "items"],
@@ -74,6 +130,16 @@
         },
         "append": {
           "type": "boolean"
+        },
+        "override": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "condition": {
+              "type": "string",
+              "enum": ["append", "replace"]
+            }
+          }
         }
       },
       "required": ["macro", "condition"],
@@ -128,6 +194,61 @@
             ]
           }
         },
+        "source": {
+          "type": "string"
+        },
+        "exceptions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "fields": {
+                "oneOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                ]
+              },
+              "comps": {
+                "oneOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "array",
+                    "items": {
+                      "oneOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              },
+              "values": {
+                "type": "array"
+              }
+            },
+            "required": ["name"]
+          }
+        },
         "warn_evttypes": {
           "type": "boolean"
         },
@@ -137,6 +258,147 @@
       },
       "required": ["rule", "desc", "condition", "output", "priority"],
       "title": "Rule"
+    },
+    "OverrideRuleRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "rule": {
+          "type": "string"
+        },
+        "condition": {
+          "type": "string"
+        },
+        "desc": {
+          "type": "string"
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "output": {
+          "type": "string"
+        },
+        "priority": {
+          "type": "string",
+          "enum": [
+            "ALERT",
+            "EMERGENCY",
+            "NOTICE",
+            "WARNING",
+            "ERROR",
+            "DEBUG",
+            "INFO",
+            "INFORMATIONAL",
+            "CRITICAL"
+          ]
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "source": {
+          "type": "string"
+        },
+        "exceptions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "fields": {
+                "oneOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                ]
+              },
+              "comps": {
+                "oneOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "array",
+                    "items": {
+                      "oneOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              },
+              "values": {
+                "type": "array"
+              }
+            },
+            "required": ["name"]
+          }
+        },
+        "warn_evttypes": {
+          "type": "boolean"
+        },
+        "skip-if-unknown-filter": {
+          "type": "boolean"
+        },
+        "override": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "condition": {
+              "type": "string",
+              "enum": ["append", "replace"]
+            },
+            "output": {
+              "type": "string",
+              "enum": ["append", "replace"]
+            },
+            "desc": {
+              "type": "string",
+              "enum": ["append", "replace"]
+            },
+            "priority": {
+              "type": "string",
+              "enum": ["replace"]
+            },
+            "enabled": {
+              "type": "string",
+              "enum": ["replace"]
+            },
+            "tags": {
+              "type": "string",
+              "enum": ["append", "replace"]
+            }
+          }
+        }
+      },
+      "required": ["rule", "override"],
+      "title": "OverrideRule"
     },
     "AppendOnlyRuleRef": {
       "type": "object",
